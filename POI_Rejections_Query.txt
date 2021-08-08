@@ -1,0 +1,65 @@
+SELECT Distinct --aili.LINE_NUMBER,
+AIL.INVOICE_NUM, 
+AIL.ORG_ID,
+   hou.name ""OU_NAME"",
+   AIL.CREATION_DATE ""CREATION_DATE1"",
+   V.VENDOR_TYPE_LOOKUP_CODE, -- addeed
+   v.segment1 ""Supplier Number"",
+   v.vendor_name ""Supplier Name"",
+   air.REJECT_LOOKUP_CODE,
+   AIL.STATUS ""INVOICE_STATUS"" ,
+   AIL.INVOICE_ID, --; added
+   AIL.INVOICE_NUM, --where INVOICE_NUM = 'SIN1133771'
+   AIL.INVOICE_TYPE_LOOKUP_CODE, -- added
+   AIL.INVOICE_DATE, -- added
+   AIL.PO_NUMBER, -- added
+   AILI.PROJECT_ID ,
+   AILI.TASK_ID,
+   AILI.EXPENDITURE_TYPE,
+   AILI.EXPENDITURE_ITEM_DATE,
+   AILI.EXPENDITURE_ORGANIZATION_ID,
+   AIL.VENDOR_ID, -- added8
+   AIL.VENDOR_NUM, -- added
+   AIL.VENDOR_NAME, -- added
+   AIL.VENDOR_SITE_ID, -- added
+   AIL.VENDOR_SITE_CODE, -- added
+   AIL.INVOICE_AMOUNT, -- added
+   AILI.TAX_RATE,
+   AILI.TAX_CLASSIFICATION_CODE,
+    AIL.INVOICE_CURRENCY_CODE,
+   AIL.EXCHANGE_RATE,-- added
+   AIL.EXCHANGE_RATE_TYPE,-- added
+   AIL.EXCHANGE_DATE, -- added
+   V.PAY_GROUP_LOOKUP_CODE,-- added
+  AIL.INVOICE_RECEIVED_DATE, --added
+  AIL.GL_DATE, -- added
+  AIL.CALC_TAX_DURING_IMPORT_FLAG,-- added
+  AIL.PAYMENT_METHOD_CODE,-- added
+   V.PAYMENT_PRIORITY, -- added
+   AIL.EXCLUSIVE_PAYMENT_FLAG,-- added
+   AIL.SOURCE ""INVOICE_SOURCE"",
+   AIL.ATTRIBUTE6 ""CASE_ID"",--added
+  ppa.segment1 ""PROJECT_NUM"",
+  --AILI.PROJECT_ID ,
+   pt.task_name,
+  --AILI.TASK_ID,
+  pt.TASK_NUMBER,
+  AILI.*
+FROM apps.ap_invoice_lines_interface AILI
+, apps.Ap_invoices_interface AIL
+,apps.pa_projects_all ppa
+, apps.pa_tasks pt
+,apps.AP_INTERFACE_REJECTIONS air
+,apps.hr_all_organization_units hou
+,apps.AP_SUPPLIERS v --  -- addeed
+WHERE AILI.INVOICE_ID=AIL.INVOICE_ID --and AIL.INVOICE_NUM='BMC-CAP-20.09.48A'
+AND (air.PARENT_ID=AILI.INVOICE_LINE_ID OR air.PARENT_ID=AIL.INVOICE_ID)
+and AILI.PROJECT_ID=ppa.PROJECT_ID(+)
+and AILI.PROJECT_ID=pt.PROJECT_ID(+)
+and hou.organization_id=AIL.ORG_ID
+and (AIL.VENDOR_ID = V.Vendor_ID or AIL.VENDOR_NUM = V.SEGMENT1) --added
+and AIL.SOURCE = 'IBM_ECM' and AIL.status='REJECTED'--  -- addeed
+and V.VENDOR_TYPE_LOOKUP_CODE = 'EXTERNAL'  -- addeed
+--and hou.name like 'GB05%'
+and regexp_like(hou.name,'CH02|SE02|SE01|NO01|FI01|DK01|NL01|NL03|AU02|NZ01|GB01|GB05|CA01|CA02|CA05|US02|US03|US05|US07|US10|US11|US12|DE01|DE02|DE03|DE04|DE05|SE03|FR01|FR03|FR08|FR13|FR16|IE02')
+ORDER BY AIL.INVOICE_NUM;
